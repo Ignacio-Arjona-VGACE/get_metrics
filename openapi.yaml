@@ -1,0 +1,61 @@
+openapi: 3.0.3
+info:
+  title: Excel Column Mean API
+  description: Accepts an Excel file and a column name, returns the mean of the numeric values in that column.
+  version: 1.0.0
+
+paths:
+  /run-python:
+    post:
+      summary: Calculate mean of a column in an uploaded Excel file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Excel file (.xlsx or .xls)
+                column:
+                  type: string
+                  description: Name of the column to calculate the mean for
+              required:
+                - file
+                - column
+      responses:
+        '200':
+          description: Mean value successfully calculated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mean:
+                    type: number
+                    format: float
+                    nullable: true
+                    description: Mean of the column values (null if no numeric values)
+        '400':
+          description: Bad request (missing file/column or column not found)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+servers:
+  - url: https://get-metrics.onrender.com
