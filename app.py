@@ -1,24 +1,24 @@
 from flask import Flask, request, jsonify
-import pandas as pd
+import re
 import os
 
 app = Flask(__name__)
 
 @app.route('/run-python', methods=['POST'])
 def run_python():
-    if 'file' not in request.files or 'column' not in request.form:
-        return jsonify({'error': 'Missing file or column name'}), 400
+    if 'file' not in request.files:
+        return jsonify({'error': 'Missing file'}), 400
 
     file = request.files['file']
-    column_name = request.form['column']
 
     try:
-        df = pd.read_excel(file)
-        if column_name not in df.columns:
-            return jsonify({'error': f'Column "{column_name}" not found in Excel file'}), 400
-
-        mean_value = df[column_name].mean()
-        return jsonify({'mean': mean_value})
+        content = file.read().decode('utf-8')
+        match = re.search(r'Espacio Workcafe\s*(\d+)\s*hora', content)
+        if match:
+            hours = int(match.group(1))
+            return jsonify({'hours': hours})
+        else:
+            return jsonify({'error': 'Pattern not found'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
